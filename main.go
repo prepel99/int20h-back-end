@@ -29,7 +29,7 @@ func main() {
 	}
 	router := mux.NewRouter()
 
-	router.HandleFunc("/send", controller.SendDataHandler()).Methods("POST")
+	// router.HandleFunc("/send", controller.SendDataHandler()).Methods("POST")
 	router.HandleFunc("/send", controller.RegisterUserHandler()).Methods("POST")
 
 	// router.HandleFunc("/get/{id}", controller.GetDataHandler()).Methods("GET")
