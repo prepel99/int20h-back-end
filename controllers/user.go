@@ -82,3 +82,31 @@ func (c *Controller) SaveOneExerciseHandler() http.HandlerFunc {
 		json.NewEncoder(w).Encode(user)
 	}
 }
+
+func (d *DataStore) GetAllUsers() ([]SensorData, error) {
+	collection := d.DB.Database("sensors").Collection("SensorsData")
+
+	options := options.Find()
+	filter := bson.M{}
+
+	// Here's an array in which you can store the decoded documents
+	var results []SensorData
+
+	// Passing nil as the filter matches all documents in the collection
+	cur, err := collection.Find(context.TODO(), filter, options)
+	if err != nil {
+		return nil, err
+	}
+	// Finding multiple documents returns a cursor
+	// Iterating through the cursor allows us to decode documents one at a time
+	for cur.Next(context.TODO()) {
+		// create a value into which the single document can be decoded
+		var elem SensorData
+		err := cur.Decode(&elem)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, elem)
+	}
+	return results, nil
+}

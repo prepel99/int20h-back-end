@@ -2,12 +2,12 @@ package models
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	// "go.mongodb.org/mongo-driver/mongo/options"
-	"errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
@@ -110,4 +110,32 @@ func (u *UserStore) SaveOneExercise(userID string, exercise WorkOut) (User, erro
 
 	err = collection.FindOne(context.TODO(), filter).Decode(&user)
 	return user, nil
+}
+
+func (u *UserStore) GetAllUsers() ([]User, error) {
+	collection := u.DB.Database("sensors").Collection("users")
+
+	options := options.Find()
+	filter := bson.M{}
+
+	// Here's an array in which you can store the decoded documents
+	var results []User
+
+	// Passing nil as the filter matches all documents in the collection
+	cur, err := collection.Find(context.TODO(), filter, options)
+	if err != nil {
+		return nil, err
+	}
+	// Finding multiple documents returns a cursor
+	// Iterating through the cursor allows us to decode documents one at a time
+	for cur.Next(context.TODO()) {
+		// create a value into which the single document can be decoded
+		var elem User
+		err := cur.Decode(&elem)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, elem)
+	}
+	return results, nil
 }

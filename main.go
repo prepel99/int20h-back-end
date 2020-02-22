@@ -35,6 +35,8 @@ func main() {
 	// router.HandleFunc("/get/{id}", controller.GetDataHandler()).Methods("GET")
 	router.HandleFunc("/get", controller.GetAllDataHandler()).Methods("GET")
 	router.HandleFunc("/register", controller.RegisterUserHandler()).Methods("POST")
+	router.HandleFunc("/users", controller.GetAllUsersHandler()).Methods("POST")
+
 	router.HandleFunc("/user/{id}", controller.GetUserHandler()).Methods("GET")
 	router.HandleFunc("/saveexercise", controller.SaveOneExerciseHandler()).Methods("POST")
 
