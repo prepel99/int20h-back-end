@@ -15,6 +15,7 @@ type UserStorer interface {
 	RegisterUser(user User) (string, error)
 	GetUser(id string) (User, error)
 	SaveOneExercise(userID string, exercise WorkOut) (User, error)
+	GetAllUsers() ([]User, error)
 }
 
 type UserStore struct {
@@ -115,6 +116,7 @@ func (u *UserStore) SaveOneExercise(userID string, exercise WorkOut) (User, erro
 func (u *UserStore) GetAllUsers() ([]User, error) {
 	collection := u.DB.Database("sensors").Collection("users")
 
+	fmt.Println(111)
 	options := options.Find()
 	filter := bson.M{}
 
@@ -135,6 +137,7 @@ func (u *UserStore) GetAllUsers() ([]User, error) {
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println(elem)
 		results = append(results, elem)
 	}
 	return results, nil

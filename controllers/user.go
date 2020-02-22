@@ -85,7 +85,8 @@ func (c *Controller) SaveOneExerciseHandler() http.HandlerFunc {
 
 func (c *Controller) GetAllUsersHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		mongoResponce, err := c.DataStore.GetAllData()
+		fmt.Println(1111)
+		mongoResponce, err := c.UserStore.GetAllUsers()
 		if err != nil {
 			logr.LogErr(err)
 			return
