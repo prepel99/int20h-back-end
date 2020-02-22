@@ -9,8 +9,9 @@ import (
 )
 
 type Controller struct {
-	DataStore models.DataStorer
-	UserStore models.UserStorer
+	DataStore   models.DataStorer
+	UserStore   models.UserStorer
+	SensorStore models.SensorStorer
 }
 
 var logr logger.Logger

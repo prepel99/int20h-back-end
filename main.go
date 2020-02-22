@@ -22,10 +22,12 @@ func main() {
 
 	storeData := models.DataStore{DB: clientMongo}
 	storeUser := models.UserStore{DB: clientMongo}
+	storeSensor := models.SensorStore{DB: clientMongo}
 
 	controller := controllers.Controller{
-		DataStore: &storeData,
-		UserStore: &storeUser,
+		DataStore:   &storeData,
+		UserStore:   &storeUser,
+		SensorStore: &storeSensor,
 	}
 	router := mux.NewRouter()
 
@@ -35,10 +37,15 @@ func main() {
 	// router.HandleFunc("/get/{id}", controller.GetDataHandler()).Methods("GET")
 	router.HandleFunc("/get", controller.GetAllDataHandler()).Methods("GET")
 	router.HandleFunc("/register", controller.RegisterUserHandler()).Methods("POST")
+	router.HandleFunc("/sensor/register", controller.RegisterSensorHandler()).Methods("POST")
+
 	router.HandleFunc("/users", controller.GetAllUsersHandler()).Methods("GET")
 
 	router.HandleFunc("/user/{id}", controller.GetUserHandler()).Methods("GET")
 	router.HandleFunc("/saveexercise", controller.SaveOneExerciseHandler()).Methods("POST")
+
+	router.HandleFunc("/sensor/register", controller.RegisterSensorHandler()).Methods("POST")
+	router.HandleFunc("/sensor/saveexercise", controller.SaveOneSensorExerciseHandler()).Methods("POST")
 
 	fmt.Println("Server is listening...")
 	loggedRouter := handlers.LoggingHandler(os.Stdout, router)

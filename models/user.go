@@ -24,16 +24,16 @@ type UserStore struct {
 
 type WorkOut struct {
 	Type    string        `json:"type" bson:"type"`
-	Results []sensorValue `json:"results" bson:"results"`
+	Results []SensorValue `json:"results" bson:"results"`
 }
 
-type sensorValue struct {
+type SensorValue struct {
 	Value int   `json:"value" bson:"value"`
 	Date  int64 `json:"date" bson:"date"`
 }
 
 type User struct {
-	ID         string             `json:"ID" bson:"_id"`
+	ID         string             `json:"ID" bson:"id"`
 	Name       string             `json:"name" bson:"name"`
 	Workouts   map[string]WorkOut `json:"workouts" bson:"workouts"`
 	Updated_at int64              `json:"updated_at" bson:"updated_at"`

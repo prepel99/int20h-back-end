@@ -9,13 +9,13 @@ import (
 	"time"
 )
 
-type SensorValue struct {
-	Value int   `json:"value" bson:"value"`
-	Date  int64 `json:"date" bson:"date"`
-}
+// type SensorValue struct {
+// 	Value int   `json:"value" bson:"value"`
+// 	Date  int64 `json:"date" bson:"date"`
+// }
 
 type SensorData struct {
-	ID         string        `json:"id" bson:"_id"`
+	ID         string        `json:"id" bson:"id"`
 	Values     []SensorValue `json:"values" bson:"values"`
 	Updated_at int64         `json:"updated_at" bson:"updated_at"`
 }
