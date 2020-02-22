@@ -33,7 +33,7 @@ type sensorValue struct {
 }
 
 type User struct {
-	ID         string             `json:"ID" bson:"ID"`
+	ID         string             `json:"ID" bson:"_id"`
 	Name       string             `json:"name" bson:"name"`
 	Workouts   map[string]WorkOut `json:"workouts" bson:"workouts"`
 	Updated_at int64              `json:"updated_at" bson:"updated_at"`
