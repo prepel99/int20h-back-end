@@ -1,0 +1,11 @@
+package: int20h-back-end
+import:
+- package: github.com/gorilla/handlers
+- package: github.com/gorilla/mux
+- package: github.com/subosito/gotenv
+- package: go.mongodb.org/mongo-driver
+  subpackages:
+  - bson
+  - mongo
+  - mongo/options
+  - mongo/readpref
