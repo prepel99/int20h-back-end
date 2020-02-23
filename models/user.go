@@ -85,8 +85,10 @@ func (u *UserStore) SaveOneExercise(userID string, exercise WorkOut) (User, erro
 	}
 	userResults := user.Workouts[exercise.Type].Results
 	for _, v := range exercise.Results {
-		now := time.Now().Unix()
-		v.Date = now
+		if v.Date == 0 {
+			now := time.Now().Unix()
+			v.Date = now
+		}
 		userResults = append(userResults, v)
 	}
 
