@@ -19,7 +19,7 @@ type Challenge struct {
 	Type       string `json:"type" bson:"type"`
 	Value      int    `json:"value" bson:"value"`
 	Done       bool   `json:"done" bson:"done"`
-	Result     bool   `json:"result" bson:"result"`
+	Result     int    `json:"result" bson:"result"`
 	Date       int64  `json:"date" bson:"date"`
 	Updated_at int64  `json:"updated_at" bson:"updated_at"`
 }
@@ -34,6 +34,7 @@ type ChallengeStorer interface {
 	CreateChallenge(chal Challenge) (string, error)
 	GetAllChallenges() ([]Challenge, error)
 	GetAllSuggestedChallenges(userID string) ([]SuggestedChallenge, error)
+	UpdateChallenge(challenge Challenge) (Challenge, error)
 }
 
 type ChallengeStore struct {
@@ -142,4 +143,30 @@ func (c *ChallengeStore) GetAllChallenges() ([]Challenge, error) {
 		results = append(results, elem)
 	}
 	return results, nil
+}
+
+func (c *ChallengeStore) UpdateChallenge(challenge Challenge) (Challenge, error) {
+	collection := c.DB.Database("sensors").Collection("challenges")
+
+	filter := bson.D{{"date", challenge.Date}}
+
+	doc, err := toDoc(challenge)
+	if err != nil {
+		return Challenge{}, err
+	}
+	update := bson.D{{"$set", *doc}}
+	_, err = collection.UpdateOne(
+		context.Background(),
+		filter,
+		update,
+	)
+	if err != nil {
+		return Challenge{}, nil
+	}
+
+	err = collection.FindOne(context.TODO(), filter).Decode(&challenge)
+	if err != nil {
+		return Challenge{}, err
+	}
+	return challenge, nil
 }

@@ -60,3 +60,28 @@ func (c *Controller) CreateChallengeHandler() http.HandlerFunc {
 		json.NewEncoder(w).Encode(id)
 	}
 }
+
+func (c *Controller) UpdateChallengeHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			logr.LogErr(err)
+			return
+		}
+
+		requestData := models.Challenge{}
+
+		if err := json.Unmarshal(body, &requestData); err != nil {
+			logr.LogErr(err)
+			return
+		}
+		result, err := c.ChallengeStore.UpdateChallenge(requestData)
+		if err != nil {
+			logr.LogErr(err)
+			return
+		}
+		json.NewEncoder(w).Encode(result)
+	}
+}

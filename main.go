@@ -53,6 +53,7 @@ func main() {
 	router.HandleFunc("/challenges/suggested/{id}", controller.GetAllSuggestedChallengesHandler()).Methods("GET")
 	router.HandleFunc("/challanges", controller.GetAllChallengesHandler()).Methods("GET")
 	router.HandleFunc("/challange/create", controller.CreateChallengeHandler()).Methods("POST")
+	router.HandleFunc("/challange/update", controller.UpdateChallengeHandler()).Methods("POST")
 
 	fmt.Println("Server is listening...")
 	loggedRouter := handlers.LoggingHandler(os.Stdout, router)
