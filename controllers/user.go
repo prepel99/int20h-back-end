@@ -83,9 +83,36 @@ func (c *Controller) SaveOneExerciseHandler() http.HandlerFunc {
 	}
 }
 
+func (c *Controller) SaveExerciseWithSensorHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			logr.LogErr(err)
+			return
+		}
+		requestData := struct {
+			UserID     string `json:"id"`
+			Exercise   models.WorkOut
+			SecondsAgo int `json:"secondsAgo"`
+		}{}
+
+		if err := json.Unmarshal(body, &requestData); err != nil {
+			logr.LogErr(err)
+			return
+		}
+		user, err := c.UserStore.SaveExerciseWithSensor(requestData.UserID, requestData.Exercise, requestData.SecondsAgo)
+		if err != nil {
+			logr.LogErr(err)
+			return
+		}
+		json.NewEncoder(w).Encode(user)
+	}
+}
+
 func (c *Controller) GetAllUsersHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(1111)
 		mongoResponce, err := c.UserStore.GetAllUsers()
 		if err != nil {
 			logr.LogErr(err)

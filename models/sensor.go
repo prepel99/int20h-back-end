@@ -41,11 +41,14 @@ func (s *SensorStore) RegisterUser(user User) (string, error) {
 func (u *SensorStore) SaveOneExercise(userID string, exercise WorkOut) (User, error) {
 	collection := u.DB.Database("sensors").Collection("SensorsData")
 
-	objID, _ := primitive.ObjectIDFromHex(userID)
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return User{}, nil
+	}
 	filter := bson.D{{"_id", objID}}
 
 	user := User{}
-	err := collection.FindOne(context.TODO(), filter).Decode(&user)
+	err = collection.FindOne(context.TODO(), filter).Decode(&user)
 	if err != nil {
 		return User{}, err
 	}

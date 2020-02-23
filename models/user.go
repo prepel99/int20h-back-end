@@ -16,6 +16,7 @@ type UserStorer interface {
 	GetUser(id string) (User, error)
 	SaveOneExercise(userID string, exercise WorkOut) (User, error)
 	GetAllUsers() ([]User, error)
+	SaveExerciseWithSensor(userID string, exercise WorkOut, secondsAgo int) (User, error)
 }
 
 type UserStore struct {
@@ -28,8 +29,9 @@ type WorkOut struct {
 }
 
 type SensorValue struct {
-	Value int   `json:"value" bson:"value"`
-	Date  int64 `json:"date" bson:"date"`
+	AvgSensorValue int   `json:"sensorValue" bson:"sensorValue"`
+	Value          int   `json:"value" bson:"value"`
+	Date           int64 `json:"date" bson:"date"`
 }
 
 type User struct {
@@ -58,12 +60,15 @@ func (u *UserStore) RegisterUser(user User) (string, error) {
 func (u *UserStore) GetUser(id string) (User, error) {
 	collection := u.DB.Database("sensors").Collection("users")
 
-	objID, _ := primitive.ObjectIDFromHex(id)
-	fmt.Println(objID)
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return User{}, err
+
+	}
 	filter := bson.D{{"_id", objID}}
 
 	user := User{}
-	err := collection.FindOne(context.TODO(), filter).Decode(&user)
+	err = collection.FindOne(context.TODO(), filter).Decode(&user)
 	if err != nil {
 		return User{}, err
 	}
@@ -73,12 +78,15 @@ func (u *UserStore) GetUser(id string) (User, error) {
 func (u *UserStore) SaveOneExercise(userID string, exercise WorkOut) (User, error) {
 	collection := u.DB.Database("sensors").Collection("users")
 
-	objID, _ := primitive.ObjectIDFromHex(userID)
-	fmt.Println(objID)
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return User{}, err
+
+	}
 	filter := bson.D{{"_id", objID}}
 
 	user := User{}
-	err := collection.FindOne(context.TODO(), filter).Decode(&user)
+	err = collection.FindOne(context.TODO(), filter).Decode(&user)
 	if err != nil {
 		return User{}, err
 	}
@@ -114,25 +122,99 @@ func (u *UserStore) SaveOneExercise(userID string, exercise WorkOut) (User, erro
 	return user, nil
 }
 
+func (u *UserStore) SaveExerciseWithSensor(userID string, exercise WorkOut, secondsAgo int) (User, error) {
+	collection := u.DB.Database("sensors").Collection("users")
+	collectionSensors := u.DB.Database("sensors").Collection("SensorsData")
+
+	objID, err := primitive.ObjectIDFromHex("5e51966d09eaf8c6d663ff3c")
+	if err != nil {
+		return User{}, err
+	}
+	filter := bson.D{{"_id", objID}}
+
+	user := User{}
+	err = collectionSensors.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		return User{}, err
+	}
+
+	exerciseValues := user.Workouts[exercise.Type]
+	accExercises := make([]SensorValue, 1)
+
+	now := time.Now()
+	backTime := time.Second * time.Duration(-secondsAgo)
+	past := now.Add(backTime).Unix()
+	avgValue := 0
+	for _, v := range exerciseValues.Results {
+		if v.Date > past {
+			accExercises = append(accExercises, v)
+			avgValue += v.Value
+		}
+	}
+	avgValue = avgValue / len(accExercises)
+
+	objID, err = primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return User{}, err
+	}
+
+	filter = bson.D{{"_id", objID}}
+
+	user = User{}
+	err = collection.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		return User{}, err
+	}
+	fmt.Println(1111)
+
+	userResults := user.Workouts[exercise.Type].Results
+	for _, v := range exercise.Results {
+		if v.Date == 0 {
+			now := time.Now().Unix()
+			v.Date = now
+		}
+		v.AvgSensorValue = avgValue
+		userResults = append(userResults, v)
+	}
+	fmt.Println(1111)
+
+	workout := user.Workouts[exercise.Type]
+	workout.Results = userResults
+
+	user.Workouts[exercise.Type] = workout
+
+	doc, err := toDoc(user)
+	if err != nil {
+		return User{}, err
+	}
+	update := bson.D{{"$set", *doc}}
+	_, err = collection.UpdateOne(
+		context.Background(),
+		filter,
+		update,
+	)
+	if err != nil {
+		return User{}, nil
+	}
+
+	err = collection.FindOne(context.TODO(), filter).Decode(&user)
+	return user, nil
+}
+
 func (u *UserStore) GetAllUsers() ([]User, error) {
 	collection := u.DB.Database("sensors").Collection("users")
 
-	fmt.Println(111)
 	options := options.Find()
 	filter := bson.M{}
 
-	// Here's an array in which you can store the decoded documents
 	var results []User
 
-	// Passing nil as the filter matches all documents in the collection
 	cur, err := collection.Find(context.TODO(), filter, options)
 	if err != nil {
 		return nil, err
 	}
-	// Finding multiple documents returns a cursor
-	// Iterating through the cursor allows us to decode documents one at a time
+
 	for cur.Next(context.TODO()) {
-		// create a value into which the single document can be decoded
 		var elem User
 		err := cur.Decode(&elem)
 		if err != nil {

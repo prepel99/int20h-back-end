@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 	"errors"
-	"fmt"
+	// "fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -46,18 +46,24 @@ func (c *ChallengeStore) CreateChallenge(chal Challenge) (string, error) {
 
 	collectionUsers := c.DB.Database("sensors").Collection("users")
 
-	objID, _ := primitive.ObjectIDFromHex(chal.ToID)
+	objID, err := primitive.ObjectIDFromHex(chal.ToID)
+	if err != nil {
+		return "", err
+	}
 	filter := bson.D{{"_id", objID}}
 
 	toUser := User{}
 	fromUser := User{}
 
-	err := collectionUsers.FindOne(context.TODO(), filter).Decode(&toUser)
+	err = collectionUsers.FindOne(context.TODO(), filter).Decode(&toUser)
 	if err != nil {
 		return "", err
 	}
 
-	objID, _ = primitive.ObjectIDFromHex(chal.FromID)
+	objID, err = primitive.ObjectIDFromHex(chal.FromID)
+	if err != nil {
+		return "", err
+	}
 	filter = bson.D{{"_id", objID}}
 
 	err = collectionUsers.FindOne(context.TODO(), filter).Decode(&fromUser)
@@ -87,12 +93,14 @@ func (c *ChallengeStore) CreateChallenge(chal Challenge) (string, error) {
 func (c *ChallengeStore) GetAllSuggestedChallenges(userID string) ([]SuggestedChallenge, error) {
 	collection := c.DB.Database("sensors").Collection("users")
 
-	objID, _ := primitive.ObjectIDFromHex(userID)
-	fmt.Println(objID)
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return []SuggestedChallenge{}, err
+	}
 	filter := bson.D{{"_id", objID}}
 
 	user := User{}
-	err := collection.FindOne(context.TODO(), filter).Decode(&user)
+	err = collection.FindOne(context.TODO(), filter).Decode(&user)
 	if err != nil {
 		return []SuggestedChallenge{}, err
 	}

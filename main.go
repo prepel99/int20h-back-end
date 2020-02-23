@@ -45,6 +45,7 @@ func main() {
 
 	router.HandleFunc("/user/{id}", controller.GetUserHandler()).Methods("GET")
 	router.HandleFunc("/exercise/save", controller.SaveOneExerciseHandler()).Methods("POST")
+	router.HandleFunc("/exercise/flag/save", controller.SaveExerciseWithSensorHandler()).Methods("POST")
 
 	router.HandleFunc("/sensor/register", controller.RegisterSensorHandler()).Methods("POST")
 	router.HandleFunc("/sensor/exercise/save", controller.SaveOneSensorExerciseHandler()).Methods("POST")
