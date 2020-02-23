@@ -49,15 +49,11 @@ func (c *Controller) CreateChallengeHandler() http.HandlerFunc {
 		requestData := models.Challenge{}
 
 		if err := json.Unmarshal(body, &requestData); err != nil {
-			// .Error = err
-			// json.NewEncoder(w).Encode(mongoResponce)
 			logr.LogErr(err)
 			return
 		}
 		id, err := c.ChallengeStore.CreateChallenge(requestData)
 		if err != nil {
-			// mongoResponce.Error = err
-			// json.NewEncoder(w).Encode(mongoResponce)
 			logr.LogErr(err)
 			return
 		}

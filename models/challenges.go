@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 	"errors"
-	// "fmt"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -43,7 +43,6 @@ type ChallengeStore struct {
 
 func (c *ChallengeStore) CreateChallenge(chal Challenge) (string, error) {
 	collection := c.DB.Database("sensors").Collection("challenges")
-
 	collectionUsers := c.DB.Database("sensors").Collection("users")
 
 	objID, err := primitive.ObjectIDFromHex(chal.ToID)
@@ -64,6 +63,7 @@ func (c *ChallengeStore) CreateChallenge(chal Challenge) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	filter = bson.D{{"_id", objID}}
 
 	err = collectionUsers.FindOne(context.TODO(), filter).Decode(&fromUser)
@@ -87,6 +87,7 @@ func (c *ChallengeStore) CreateChallenge(chal Challenge) (string, error) {
 	if !ok {
 		return "", errors.New("cannot parse ObjectID")
 	}
+
 	return newID.Hex(), nil
 }
 
